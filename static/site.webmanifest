@@ -1,7 +1,7 @@
 {
     "name": "PicoBooks",
     "short_name": "PicoBooks App",
-    "start_url": "../index.html",
+    "start_url": "index.html",
     "display": "standalone",
     "background_color": "#dc143c",
     "theme_color": "#dc143c",
