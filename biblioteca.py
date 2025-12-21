@@ -20,10 +20,14 @@ os.makedirs(STATIC_DIR, exist_ok=True)
 def buscar_pdfs_en_root(base_dir):
     """Busca PDFs en la carpeta raíz y devuelve lista de tuplas (ruta, carpeta, archivo)."""
     pdfs = []
-    for f in os.listdir(base_dir):
-        if f.lower().endswith(".pdf"):
-            pdfs.append((os.path.join(base_dir, f), ".", f))
+    for root, _, files in os.walk(base_dir):
+        for f in files:
+            if f.lower().endswith(".pdf"):
+                ruta = os.path.join(root, f)
+                carpeta_rel = os.path.relpath(root, base_dir)
+                pdfs.append((ruta, carpeta_rel, f))
     return pdfs
+
 
 
 def sanitizar_nombre(nombre):
