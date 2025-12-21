@@ -17,8 +17,11 @@ os.makedirs(STATIC_DIR, exist_ok=True)
 # --- Funciones ---
 
 
-def buscar_pdfs_en_root(base_dir):
-    """Busca PDFs en la carpeta raíz y devuelve lista de tuplas (ruta, carpeta, archivo)."""
+def buscar_pdfs_recursivo(base_dir):
+    """
+    Busca PDFs recursivamente.
+    Devuelve lista de tuplas: (ruta_completa, carpeta_relativa, archivo)
+    """
     pdfs = []
     for root, _, files in os.walk(base_dir):
         for f in files:
@@ -369,7 +372,8 @@ def generar_html(pdfs):
 
 # --- Ejecución ---
 
-pdf_files = buscar_pdfs_en_root(PDF_DIR)
+pdf_files = buscar_pdfs_recursivo(PDF_DIR)
+
 extraer_miniaturas(pdf_files)
 crear_logo_pdf()
 crear_favicon()
