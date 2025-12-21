@@ -32,7 +32,6 @@ def buscar_pdfs_recursivo(base_dir):
     return pdfs
 
 
-
 def sanitizar_nombre(nombre):
     """Sanitiza el nombre reemplazando guiones y guiones bajos por espacios y capitalizando."""
     nombre_sin_ext = os.path.splitext(nombre)[0]
@@ -85,7 +84,7 @@ def crear_manifest():
     manifest = {
         "name": repo,
         "short_name": repo + " App",
-        "start_url": "../index.html",
+        "start_url": "index.html",
         "display": "standalone",
         "background_color": "#dc143c",
         "theme_color": "#dc143c",
@@ -108,12 +107,10 @@ def crear_service_worker(pdfs):
     """Crea el service-worker.js para caché de la PWA."""
     urls = ["./", "logo.webp", "favicon.ico", "site.webmanifest"]
     
-    for _, _, archivo in pdfs:
-        base = os.path.splitext(archivo)[0]
-        miniatura = quote(f"{base}.webp")
-        pdf_url = quote(f"{archivo}")
-        urls.append(pdf_url)
-        urls.append(miniatura)
+    for _, carpeta, archivo in pdfs:
+        nombre = nombre_miniatura(carpeta, archivo)
+        urls.append(quote(os.path.join(carpeta, archivo)))
+        urls.append(quote(f"static/{nombre}.webp"))
         
     contenido = f"""
 const CACHE_NAME = "revistas-cache-v1";
@@ -156,10 +153,10 @@ self.addEventListener("fetch", event => {{
 
 def extraer_miniaturas(pdfs):
     """Extrae la primera página de cada PDF y crea miniaturas WEBP."""
-    for ruta_pdf, _, archivo in pdfs:
-        base = os.path.splitext(archivo)[0]
-        salida_miniatura = os.path.join(STATIC_DIR, base + ".webp")
-        if os.path.exists(salida_miniatura):
+    for ruta_pdf, carpeta, archivo in pdfs:
+        nombre = nombre_miniatura(carpeta, archivo)
+        salida = os.path.join(STATIC_DIR, nombre + ".webp")
+        if os.path.exists(salida):
             continue
             
         try:
@@ -168,10 +165,15 @@ def extraer_miniaturas(pdfs):
                 pix = pagina.get_pixmap(matrix=fitz.Matrix(300 / 72, 300 / 72))
                 img = Image.open(io.BytesIO(pix.tobytes("png")))
                 img_red = img.resize((ANCHO, ALTO), Image.LANCZOS)
-                img_red.save(salida_miniatura, "WEBP", quality=80, lossless=True)
+                img_red.save(salida, "WEBP", quality=80, lossless=True)
         except Exception as e:
             print(f"Error en {archivo}: {e}")
 
+def nombre_miniatura(carpeta, archivo):
+    base = os.path.splitext(archivo)[0]
+    if carpeta == ".":
+        return base
+    return carpeta.replace(os.sep, "_") + "_" + base
 
 def generar_html(pdfs):
     """Genera el index.html con las miniaturas y títulos de los PDFs."""
@@ -185,7 +187,6 @@ def generar_html(pdfs):
     <title>{folder_name}</title>
     <link rel="icon" type="image/x-icon" href="static/favicon.ico">
     <link rel="manifest" href="static/site.webmanifest">
-    <script src="static/service-worker.js"></script>
     <style>
         html, body {{
             margin: 0;
@@ -348,11 +349,11 @@ def generar_html(pdfs):
     <div class="pdfs-container">
 """
 
-    for _, _, archivo in pdfs:
-        base = os.path.splitext(archivo)[0]
-        titulo_limpio = sanitizar_nombre(base)
-        ruta_miniatura = quote(f"static/{base}.webp")
-        ruta_pdf = quote(f"{archivo}")
+    for _, carpeta, archivo in pdfs:
+        nombre = nombre_miniatura(carpeta, archivo)
+        titulo_limpio = sanitizar_nombre(archivo)
+        ruta_miniatura = quote(f"static/{nombre}.webp")
+        ruta_pdf = quote(os.path.join(carpeta, archivo))
         html += f"""
         <div class="pdf-container">
             <img src="{ruta_miniatura}" class="pdf-thumbnail" onclick="window.open('{ruta_pdf}', '_blank')">
