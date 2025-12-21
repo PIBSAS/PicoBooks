@@ -1,0 +1,21 @@
+{
+    "name": "PicoBooks",
+    "short_name": "PicoBooks App",
+    "start_url": "../index.html",
+    "display": "standalone",
+    "background_color": "#dc143c",
+    "theme_color": "#dc143c",
+    "description": "Visualizador de PDFs con miniaturas",
+    "icons": [
+        {
+            "src": "logo.webp",
+            "sizes": "256x256",
+            "type": "image/webp"
+        },
+        {
+            "src": "favicon.ico",
+            "sizes": "128x128 64x64 32x32 24x24 16x16",
+            "type": "image/x-icon"
+        }
+    ]
+}
