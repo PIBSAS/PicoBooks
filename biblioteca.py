@@ -34,7 +34,8 @@ def buscar_pdfs_recursivo(base_dir):
                 if carpeta_rel == '.':
                     carpeta_rel = ''
                 pdfs.append((ruta, carpeta_rel, f))
-                printf(f"Encontrado: {carpeta_rel/{f}}")
+                print(f"Encontrado: {carpeta_rel/{f}}")
+    print(f"Total PDFs encontrados: {len(pdfs)}")
     return pdfs
 
 
