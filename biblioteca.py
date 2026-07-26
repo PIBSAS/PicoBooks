@@ -23,8 +23,10 @@ def buscar_pdfs_recursivo(base_dir):
     """
     pdfs = []
     print(f"Buscando en: {base_dir}")
+    ignore_dirs = {'.git', 'static', '__pycache__', '.github', '.vscode', 'node_modules'}
     for root, _, files in os.walk(base_dir):
-        dirs[:] = [d for d in dirs if not d.startswith('.') and d != 'static']
+        if any(ignore in root.split(os.sep) for ignore in ignore_dirs):
+            continue
         for f in files:
             if f.lower().endswith(".pdf"):
                 ruta = os.path.join(root, f)
