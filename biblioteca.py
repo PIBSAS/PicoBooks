@@ -1,18 +1,17 @@
-import os
-import json
-import io
+import os, json, io
 from urllib.parse import quote
 
 import fitz
 from PIL import Image, ImageDraw, ImageFont
-
-BASE_DIR = os.getcwd()
-PDF_DIR = BASE_DIR
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+BASE_DIR = os.path.dirname(SCRIPT_DIR) if os.path.basename(SCRIPT_DIR) == "scripts" else SCRIPT_DIR
+#PDF_DIR = BASE_DIR
 ANCHO = 332
 ALTO = 443
 STATIC_DIR = os.path.join(BASE_DIR, "static")
 os.makedirs(STATIC_DIR, exist_ok=True)
-
+print(f"base: {BASE_DIR}")
+print(f"estatico: {STATIC_DIR}")
 
 # --- Funciones ---
 
@@ -23,12 +22,17 @@ def buscar_pdfs_recursivo(base_dir):
     Devuelve lista de tuplas: (ruta_completa, carpeta_relativa, archivo)
     """
     pdfs = []
+    print(f"Buscando en: {base_dir}")
     for root, _, files in os.walk(base_dir):
+        dirs[:] = [d for d in dirs if not d.startswith('.') and d != 'static']
         for f in files:
             if f.lower().endswith(".pdf"):
                 ruta = os.path.join(root, f)
                 carpeta_rel = os.path.relpath(root, base_dir)
+                if carpeta_rel == '.':
+                    carpeta_rel = ''
                 pdfs.append((ruta, carpeta_rel, f))
+                printf(f"Encontrado: {carpeta_rel/{f}}")
     return pdfs
 
 
@@ -72,9 +76,10 @@ def crear_favicon():
     """Crea favicon.ico a partir del logo."""
     ruta_logo = os.path.join(STATIC_DIR, "logo.webp")
     ruta_fav = os.path.join(STATIC_DIR, "favicon.ico")
-    img = Image.open(ruta_logo).convert("RGBA")
-    img = img.resize((128, 128), Image.LANCZOS)
-    img.save(ruta_fav, format="ICO")
+    if os.path.exists(ruta_logo):
+        img = Image.open(ruta_logo).convert("RGBA")
+        img = img.resize((128, 128), Image.LANCZOS)
+        img.save(ruta_fav, format="ICO")
 
 
 def crear_manifest():
@@ -373,7 +378,7 @@ def generar_html(pdfs):
 
 # --- Ejecución ---
 
-pdf_files = buscar_pdfs_recursivo(PDF_DIR)
+pdf_files = buscar_pdfs_recursivo(BASE_DIR)
 
 extraer_miniaturas(pdf_files)
 crear_logo_pdf()
